@@ -1,0 +1,7 @@
+- module: nginx
+  access:
+    enabled: true
+    var.paths: ["${path.config}/logs/nginx/laravel_access.log*"]
+  error:
+    enabled: true
+    var.paths: ["${path.config}/logs/nginx/laravel_error.log*"]

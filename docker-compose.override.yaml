@@ -1,0 +1,141 @@
+version: '3.4'
+
+x-build:
+  - &build-args
+    APP_ENV: 'dev'
+    APP_DEBUG: 'true'
+  - &build-cache
+    - ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
+    - ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:dev
+
+services:
+  mysql:
+    image: mysql:8
+    command: ['--default-authentication-plugin=mysql_native_password']
+    environment:
+      MYSQL_DATABASE: 'test'
+      MYSQL_ROOT_PASSWORD: 'root'
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - target: 3306
+        published: 3306
+        protocol: tcp
+
+  setup:
+    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
+    command: ['setup']
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      target: php
+      cache_from: *build-cache
+      args:
+        << : *build-args
+    environment:
+      << : *build-args
+    volumes:
+      - ./laravel:/laravel:rw
+    depends_on:
+      - mysql
+
+  fpm:
+    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
+    build:
+      cache_from: *build-cache
+      args:
+        << : *build-args
+    environment:
+      << : *build-args
+    volumes:
+      - ./laravel:/laravel:rw,cached
+      - fpm-log-data:/laravel/storage/logs:rw
+    depends_on:
+      - mysql
+
+  supervisor:
+    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
+    build:
+      cache_from: *build-cache
+      args:
+        << : *build-args
+    environment:
+      << : *build-args
+      SUPERVISOR_USERNAME: root
+      SUPERVISOR_PASSWORD: root
+    volumes:
+      - ./laravel:/laravel:rw,cached
+      - supervisor-log-data:/laravel/storage/logs:rw
+    ports:
+      - target: 9000
+        published: 9000
+        protocol: tcp
+    depends_on:
+      - mysql
+
+  nginx:
+    image: ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:dev
+    build:
+      cache_from: *build-cache
+      args:
+        << : *build-args
+    environment:
+      # `fpm` container name use to pass request via `fastcgi_pass`, it useful when you want to change `fpm` service name or container name of it.
+      FPM_SERVICE: fpm
+    volumes:
+    - ./laravel/public:/laravel/public:rw,cached
+    - nginx-log-data:/var/log/nginx:rw
+    ports:
+    - target: 80
+      published: 80
+      protocol: tcp
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - target: 8025
+        published: 8025
+        protocol: tcp
+
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    ports:
+      - target: 15672
+        published: 15672
+        protocol: tcp
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.0
+    environment:
+      discovery.type: "single-node"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.6.0
+    depends_on:
+      - elasticsearch
+    environment:
+      SERVER_NAME: localhost
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - target: 5601
+        published: 5601
+        protocol: tcp
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.6.0
+    command: "filebeat -e -strict.perms=false"
+    depends_on:
+      - elasticsearch
+      - kibana
+    volumes:
+      - ./docker/dev-filebeat/modules.d:/usr/share/filebeat/modules.d:ro
+      - ./docker/dev-filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - fpm-log-data:/usr/share/filebeat/logs/fpm:ro
+      - supervisor-log-data:/usr/share/filebeat/logs/supervisor:ro
+      - nginx-log-data:/usr/share/filebeat/logs/nginx:ro
+
+volumes:
+  db-data: {}
+  fpm-log-data: {}
+  nginx-log-data: {}
+  supervisor-log-data: {}
