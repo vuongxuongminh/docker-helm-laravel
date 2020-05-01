@@ -49,6 +49,11 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 |
 */
 
+Illuminate\Http\Request::setTrustedProxies(
+    explode(',', env('TRUSTED_PROXIES')),
+    Illuminate\Http\Request::HEADER_X_FORWARDED_ALL ^ Illuminate\Http\Request::HEADER_X_FORWARDED_HOST
+);
+
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $response = $kernel->handle(

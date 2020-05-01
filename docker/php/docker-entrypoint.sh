@@ -13,6 +13,10 @@ if [ "$1" = 'fpm' ] || [ "$1" = 'supervisor' ] || [ "$1" = 'setup' ]; then
 
   ./artisan storage:link
 
+  if [ ${APP_ENV:-local} = 'production' ]; then
+    	./artisan config:cache;
+  fi
+
 	if [ "$1" = 'supervisor' ]; then
 	  cp /var/supervisord/base.conf /var/supervisord/supervisord.conf
 

@@ -2,11 +2,11 @@ version: '3.4'
 
 x-build:
   - &build-args
-    APP_ENV: 'dev'
+    APP_ENV: 'local'
     APP_DEBUG: 'true'
   - &build-cache
-    - ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
-    - ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:dev
+    - ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
+    - ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:local
 
 services:
   mysql:
@@ -23,7 +23,7 @@ services:
         protocol: tcp
 
   setup:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
+    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
     command: ['setup']
     build:
       context: .
@@ -40,7 +40,7 @@ services:
       - mysql
 
   fpm:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
+    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
     build:
       cache_from: *build-cache
       args:
@@ -54,7 +54,7 @@ services:
       - mysql
 
   supervisor:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:dev
+    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
     build:
       cache_from: *build-cache
       args:
@@ -74,7 +74,7 @@ services:
       - mysql
 
   nginx:
-    image: ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:dev
+    image: ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:local
     build:
       cache_from: *build-cache
       args:

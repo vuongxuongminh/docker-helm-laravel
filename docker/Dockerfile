@@ -108,7 +108,6 @@ RUN	if [ "$APP_ENV" = 'prod' ]; then \
 	composer dump-autoload --classmap-authoritative; \
 	fi
 
-RUN ./artisan storage:link;
 RUN ./artisan vendor:publish --tag=public --force;
 
 VOLUME /laravel/storage
