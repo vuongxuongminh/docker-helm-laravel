@@ -8,7 +8,7 @@ imagePullPolicy: Always
 php:
   image:
     repository: vuongxuongminh/docker-helm-laravel-php
-    tag: prod
+    tag: production
   supervisor:
     basicAuth:
       username: 'user'
@@ -45,7 +45,7 @@ php:
 nginx:
   image:
     repository: vuongxuongminh/docker-helm-laravel-nginx
-    tag: prod
+    tag: production
   replicaCount: 1
   nodeSelector: {}
   tolerations: []
