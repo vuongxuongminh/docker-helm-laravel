@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+  labels:
+    {{- include "labels" . | nindent 4 }}
+    component: ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.nginx.hostName | quote }}
+      secretName: {{ .Values.ingress.nginx.tlsSecret | quote }}
+    - hosts:
+        - {{ .Values.ingress.supervisor.hostName | quote }}
+      secretName: {{ .Values.ingress.supervisor.tlsSecret | quote }}
+{{- end }}
+  rules:
+    - http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ template "nginx" . }}
+              servicePort: 80
+      host: {{ .Values.ingress.nginx.hostName | quote }}
+    - http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ template "supervisor" . }}
+              servicePort: 9000
+      host: {{ .Values.ingress.supervisor.hostName | quote }}

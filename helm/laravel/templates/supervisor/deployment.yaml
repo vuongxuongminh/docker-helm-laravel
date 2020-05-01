@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "supervisor" . }}
+  labels:
+    {{- include "labels" . | nindent 4 }}
+    component: supervisor
+spec:
+  replicas: {{ .Values.php.supervisor.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "matchLabels" . | nindent 6 }}
+      component: supervisor
+  template:
+    metadata:
+      labels:
+        {{- include "labels" . | nindent 8 }}
+        component: supervisor
+      {{- with .Values.php.supervisor.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: supervisor
+        image: {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command:
+          - docker-entrypoint
+        args:
+          - supervisor
+        livenessProbe:
+          exec:
+            command:
+              - docker-healthcheck
+              - supervisor
+          initialDelaySeconds: 30
+          periodSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - docker-healthcheck
+              - supervisor
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        envFrom:
+          - configMapRef:
+              name: {{ template "php" . }}
+          - secretRef:
+              name: {{ template "php" . }}
+          - secretRef:
+              name: {{ template "supervisor" . }}
+        {{- with .Values.php.supervisor.resources }}
+        resources:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+        ports:
+        - containerPort: 9000
+          name: supervisor
+      {{- with .Values.php.supervisor.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.php.supervisor.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.php.supervisor.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}

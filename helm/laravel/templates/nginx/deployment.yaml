@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "nginx" . }}
+  labels:
+    {{- include "labels" . | nindent 4 }}
+    component: nginx
+spec:
+  replicas: {{ .Values.nginx.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "matchLabels" . | nindent 6 }}
+      component: nginx
+  template:
+    metadata:
+      labels:
+        {{- include "labels" . | nindent 8 }}
+        component: nginx
+      {{- with .Values.nginx.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: supervisor
+          image: {{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          livenessProbe:
+            exec:
+              command:
+                - docker-healthcheck
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - docker-healthcheck
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          env:
+            - name: FPM_SERVICE
+              value: {{ template "fpm" . }}
+          {{- with .Values.nginx.resources }}
+          resources:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          ports:
+            - containerPort: 80
+              name: http
+      {{- with .Values.nginx.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}

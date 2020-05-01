@@ -1,0 +1,9 @@
+dependencies:
+- name: mysql
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: ~1.6.2
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: ~6.18.9
+digest: sha256:0ec9c58ca429abe3f83140737e4d0171ac919195cc2ae91c5a5d176e01869b56
+generated: "2020-05-01T17:53:31.126931558+07:00"
