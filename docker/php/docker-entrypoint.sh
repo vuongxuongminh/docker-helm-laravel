@@ -3,6 +3,7 @@ set -e
 
 if [ "$1" = 'fpm' ] || [ "$1" = 'supervisor' ] || [ "$1" = 'setup' ]; then
   mkdir -p \
+        /laravel/bootstrap/cache \
         /laravel/storage/app/public \
         /laravel/storage/framework/cache \
         /laravel/storage/framework/sessions \
@@ -10,6 +11,8 @@ if [ "$1" = 'fpm' ] || [ "$1" = 'supervisor' ] || [ "$1" = 'setup' ]; then
         /laravel/storage/logs;
   setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX /laravel/storage
   setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX /laravel/storage
+  setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX /laravel/bootstrap/cache
+  setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX /laravel/bootstrap/cache
 
   ./artisan storage:link
 

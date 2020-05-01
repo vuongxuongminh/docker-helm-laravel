@@ -60,7 +60,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN chmod +x /usr/bin/composer; sync
 
-RUN if [ "${APP_ENV}" = 'prod' ]; then \
+RUN if [ "${APP_ENV}" = 'production' ]; then \
     ln -sf $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini; \
     else \
     ln -sf $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini; \
@@ -73,7 +73,7 @@ WORKDIR /laravel
 
 # Copy needed resources of app.
 COPY /laravel/app /laravel/app
-COPY /laravel/bootstrap /laravel/bootstrap
+COPY /laravel/bootstrap/app.php /laravel/bootstrap/app.php
 COPY /laravel/config /laravel/config
 COPY /laravel/database /laravel/database
 COPY /laravel/public /laravel/public
@@ -84,15 +84,8 @@ COPY /laravel/artisan /laravel/artisan
 COPY /laravel/composer.json /laravel/composer.json
 COPY /laravel/composer.lock /laravel/composer.lock
 
-ENV PATH="${PATH}:/root/.composer/vendor/bin"
-
-RUN if [ "${APP_ENV}" = 'prod' ]; then \
-	composer install --prefer-dist --no-dev --no-scripts --no-progress --no-suggest; \
-	else \
-    composer install --prefer-dist --no-scripts --no-progress --no-suggest; \
-    fi
-
 RUN mkdir -p \
+    /laravel/bootstrap/cache \
     /laravel/storage/app/public \
     /laravel/storage/framework/cache \
     /laravel/storage/framework/sessions \
@@ -100,15 +93,22 @@ RUN mkdir -p \
     /laravel/storage/logs \
     ;
 
-RUN chmod +x artisan; sync
+ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-RUN	if [ "$APP_ENV" = 'prod' ]; then \
+RUN if [ "${APP_ENV}" = 'production' ]; then \
+	composer install --prefer-dist --no-dev --no-scripts --no-progress --no-suggest; \
+	else \
+    composer install --prefer-dist --no-scripts --no-progress --no-suggest; \
+    fi
+
+RUN chmod +x artisan; sync
+RUN ./artisan vendor:publish --tag=public --force;
+
+RUN	if [ "$APP_ENV" = 'production' ]; then \
 	composer dump-autoload --classmap-authoritative --no-dev; \
 	else \
 	composer dump-autoload --classmap-authoritative; \
 	fi
-
-RUN ./artisan vendor:publish --tag=public --force;
 
 VOLUME /laravel/storage
 
