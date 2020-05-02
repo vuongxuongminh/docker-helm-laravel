@@ -14,10 +14,9 @@ if [ "$1" = 'fpm' ] || [ "$1" = 'supervisor' ] || [ "$1" = 'setup' ]; then
   setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX /laravel/bootstrap/cache
   setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX /laravel/bootstrap/cache
 
-  ./artisan storage:link
-
   if [ ${APP_ENV:-local} = 'production' ]; then
-    	./artisan config:cache;
+    	./artisan config:cache
+    	./artisan storage:link
   fi
 
 	if [ "$1" = 'supervisor' ]; then
@@ -51,9 +50,10 @@ if [ "$1" = 'fpm' ] || [ "$1" = 'supervisor' ] || [ "$1" = 'setup' ]; then
       ./artisan migrate --force
     fi
 
+    ./artisan storage:link
+
     exit 0
 	fi
-
 fi
 
 exec docker-php-entrypoint "$@"
