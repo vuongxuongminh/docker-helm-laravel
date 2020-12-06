@@ -4,7 +4,7 @@
 
 ## About it
 
-This is a template base on `laravel/laravel` (Laravel 7) and set of Docker services, include basic Helm chart help you save time 
+This is a template base on `laravel/laravel` (Laravel 8) and set of Docker services, include basic Helm chart help you save time 
 to start a new containerize project with Laravel.
 
 Composer package included:
