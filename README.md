@@ -32,13 +32,13 @@ This starts the following services:
 
 | Name          |           Description                                               | Ports | Environments |
 |---------------|---------------------------------------------------------------------|------ |--------------|
-| fpm           | FastCGI process manager with PHP-FPM 7.4.5, Composer.               | n/a   | all          |
-| supervisor    | Process control system with PHP 7.4.5, Supervisor 4.1.0, Composer   | 9000  | all          |
+| fpm           | FastCGI process manager with PHP-FPM 7.4.13, Composer.              | n/a   | all          |
+| supervisor    | Process control system with PHP 7.4.13, Supervisor 4.2.1, Composer  | 9000  | all          |
 | nginx         | Reverse proxy handle request with NGINX 1.17                        | 80    | all          |
 | setup         | Setup service help run migration & install Composer package         | n/a   | dev          |
-| filebeat      | Ship logs of Nginx & FPM & Supervisor services                      | n/a   | dev          |
-| elasticsearch | Store logs ship from filebeat service                               | n/a   | dev          |
-| kibana        | Logs viewer                                                         | 5601  | dev          |
+| promtail      | Ship logs of Nginx & FPM & Supervisor services to Loki              | n/a   | dev          |
+| loki          | Logs datasource                                                     | n/a   | dev          |
+| grafana       | Logs visualization                                                  | 3000  | dev          |
 | rabbitmq      | Message broker                                                      | 15672 | dev          |
 | mysql         | Mysql database server                                               | 3306  | dev          |
 | mailhog       | Mail server mock                                                    | 8025  | dev          |
@@ -48,18 +48,18 @@ This results in the following running containers:
 ```shell script
 $ docker-compose ps
 
-               Name                              Command                  State                                          Ports                                    
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-docker-helm-laravel_elasticsearch_1   /usr/local/bin/docker-entr ...   Up             9200/tcp, 9300/tcp                                                          
-docker-helm-laravel_filebeat_1        /usr/local/bin/docker-entr ...   Up                                                                                         
-docker-helm-laravel_fpm_1             docker-entrypoint fpm            Up (healthy)   9000/tcp                                                                    
-docker-helm-laravel_kibana_1          /usr/local/bin/dumb-init - ...   Up             0.0.0.0:5601->5601/tcp                                                      
-docker-helm-laravel_mailhog_1         MailHog                          Up             1025/tcp, 0.0.0.0:8025->8025/tcp                                            
-docker-helm-laravel_mysql_1           docker-entrypoint.sh --def ...   Up             3306/tcp, 33060/tcp                                                         
-docker-helm-laravel_nginx_1           docker-entrypoint nginx -g ...   Up (healthy)   0.0.0.0:80->80/tcp                                                          
-docker-helm-laravel_rabbitmq_1        docker-entrypoint.sh rabbi ...   Up             15671/tcp, 0.0.0.0:15672->15672/tcp, 25672/tcp, 4369/tcp, 5671/tcp, 5672/tcp
-docker-helm-laravel_setup_1           docker-entrypoint setup          Exit 0                                                                                     
-docker-helm-laravel_supervisor_1      docker-entrypoint supervisor     Up (healthy)   0.0.0.0:9000->9000/tcp         
+              Name                            Command                  State                                          Ports                                    
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+docker-helm-laravel_fpm_1          docker-entrypoint fpm            Up (healthy)   9000/tcp                                                                    
+docker-helm-laravel_grafana_1      /run.sh                          Up             0.0.0.0:3000->3000/tcp                                                      
+docker-helm-laravel_loki_1         /usr/bin/loki -config.file ...   Up             3100/tcp                                                                    
+docker-helm-laravel_mailhog_1      MailHog                          Up             1025/tcp, 0.0.0.0:8025->8025/tcp                                            
+docker-helm-laravel_mysql_1        docker-entrypoint.sh --def ...   Up             0.0.0.0:3306->3306/tcp, 33060/tcp                                           
+docker-helm-laravel_nginx_1        docker-entrypoint nginx -g ...   Up (healthy)   0.0.0.0:80->80/tcp                                                          
+docker-helm-laravel_promtail_1     /usr/bin/promtail -config. ...   Up                                                                                         
+docker-helm-laravel_rabbitmq_1     docker-entrypoint.sh rabbi ...   Up             15671/tcp, 0.0.0.0:15672->15672/tcp, 25672/tcp, 4369/tcp, 5671/tcp, 5672/tcp
+docker-helm-laravel_setup_1        docker-entrypoint setup          Exit 0                                                                                     
+docker-helm-laravel_supervisor_1   docker-entrypoint supervisor     Up (healthy)   0.0.0.0:9000->9000/tcp         
 ```
 
 If you want to change a PHP or Nginx version, open `docker-compose.yaml` and add build args:
@@ -74,10 +74,16 @@ Now you can visiting:
 + Your Laravel app: http://localhost
 + Supervisor: http://localhost:9000 (Username: `root`, Password: `root` you can set it in `docker-compose.override.yaml`)
 + RabbitMQ: http://localhost:15672 (Username: `guest`, Password: `guest` you can set it in `docker-compose.override.yaml`)
-+ Kibana: http://localhost:5601
++ Grafana: http://localhost:3000/dashboards (Username: `admin`, Password: `admin` you can set it in `docker-compose.override.yaml`)
 + Mailhog: http://localhost:8025
 
 And access MySQL via port 3306 (Username: `root`, Password: `root` you can set it in `docker-compose.override.yaml`)
+
+### Grafana dashboards
+
++ Logs visualization
+
+![Logs visualization](./screenshots/dashboard.png)
 
 ## Deploy project into Kubernetes cluster
 
