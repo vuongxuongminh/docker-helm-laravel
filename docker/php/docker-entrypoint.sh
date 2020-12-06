@@ -5,7 +5,7 @@ if [ "$1" = 'fpm' ] || [ "$1" = 'supervisor' ] || [ "$1" = 'setup' ]; then
   mkdir -p \
         /laravel/bootstrap/cache \
         /laravel/storage/app/public \
-        /laravel/storage/framework/cache \
+        /laravel/storage/framework/cache/data \
         /laravel/storage/framework/sessions \
         /laravel/storage/framework/views \
         /laravel/storage/logs;

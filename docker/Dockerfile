@@ -1,4 +1,4 @@
-ARG PHP_VERSION='7.4.5'
+ARG PHP_VERSION='7.4.13'
 ARG NGINX_VERSION='1.17'
 
 # "php" stage
@@ -17,6 +17,7 @@ RUN apk add --no-cache \
 		file \
 		gettext \
 		git \
+		py3-pip \
 	;
 
 RUN set -eux; \
@@ -27,7 +28,6 @@ RUN set -eux; \
 		zlib-dev \
 		rabbitmq-c-dev \
 	; \
-	apk add --no-cache python3; \
 	pip3 install supervisor; \
 	docker-php-ext-configure zip; \
 	docker-php-ext-install -j$(nproc) \
@@ -87,7 +87,7 @@ COPY /laravel/composer.lock /laravel/composer.lock
 RUN mkdir -p \
     /laravel/bootstrap/cache \
     /laravel/storage/app/public \
-    /laravel/storage/framework/cache \
+    /laravel/storage/framework/cache/data \
     /laravel/storage/framework/sessions \
     /laravel/storage/framework/views \
     /laravel/storage/logs \
