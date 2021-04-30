@@ -5,143 +5,31 @@ x-build:
     APP_ENV: 'local'
     APP_DEBUG: 'true'
   - &build-cache
-    - ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
-    - ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:local
+    - ${IMAGE:-vuongxuongminh/docker-helm-laravel}:dev
 
 services:
-  mysql:
-    image: mysql:8
-    command: ['--default-authentication-plugin=mysql_native_password']
-    environment:
-      MYSQL_DATABASE: 'test'
-      MYSQL_ROOT_PASSWORD: 'root'
-    volumes:
-      - db-data:/var/lib/mysql
-    ports:
-      - target: 3306
-        published: 3306
-        protocol: tcp
-
   setup:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
+    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:dev
     command: ['setup']
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
-      target: php
+      dockerfile: ./docker/fpm/Dockerfile
       cache_from: *build-cache
       args:
         << : *build-args
-    environment:
-      << : *build-args
     volumes:
-      - ./laravel:/laravel:rw
-    depends_on:
-      - mysql
+      - ./laravel:/laravel
 
   fpm:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
+    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:dev
     build:
       cache_from: *build-cache
       args:
         << : *build-args
-    environment:
-      << : *build-args
     volumes:
-      - ./laravel:/laravel:rw,cached
-      - fpm-log-data:/laravel/storage/logs:rw
-    depends_on:
-      - mysql
-      - rabbitmq
-      - mailhog
-
-  supervisor:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:local
-    build:
-      cache_from: *build-cache
-      args:
-        << : *build-args
-    environment:
-      << : *build-args
-      SUPERVISOR_USERNAME: root
-      SUPERVISOR_PASSWORD: root
-    volumes:
-      - ./laravel:/laravel:rw,cached
-      - supervisor-log-data:/laravel/storage/logs:rw
-    ports:
-      - target: 9000
-        published: 9000
-        protocol: tcp
-    depends_on:
-      - mysql
-      - rabbitmq
-      - mailhog
+      - ./laravel:/laravel
 
   nginx:
-    image: ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:local
-    build:
-      cache_from: *build-cache
-      args:
-        << : *build-args
-    environment:
-      # `fpm` container name use to pass request via `fastcgi_pass`, it useful when you want to change `fpm` service name or container name of it.
-      FPM_SERVICE: fpm
     volumes:
-      - ./laravel/public:/laravel/public:rw,cached
-      - nginx-log-data:/var/log/nginx:rw
-    ports:
-      - target: 80
-        published: 80
-        protocol: tcp
-
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - target: 8025
-        published: 8025
-        protocol: tcp
-
-  rabbitmq:
-    image: rabbitmq:3.8-management-alpine
-    ports:
-      - target: 15672
-        published: 15672
-        protocol: tcp
-
-  grafana:
-    image: grafana/grafana
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-    depends_on:
-      - promtail
-    ports:
-      - target: 3000
-        published: 3000
-        protocol: tcp
-
-  loki:
-    image: grafana/loki
-    command: -config.file=/etc/loki/local-config.yaml
-
-  promtail:
-    image: grafana/promtail
-    depends_on:
-      - loki
-    volumes:
-      - fpm-log-data:/var/log/fpm
-      - nginx-log-data:/var/log/nginx
-      - supervisor-log-data:/var/log/supervisor
-      - ./docker/promtail:/etc/promtail:ro
-    command: -config.file=/etc/promtail/config.yaml
-
-volumes:
-  db-data: {}
-  grafana-data: {}
-  fpm-log-data: {}
-  nginx-log-data: {}
-  supervisor-log-data: {}
+      - ./laravel/public:/laravel/public
+      - ./docker/nginx/default.conf:/opt/bitnami/nginx/conf/server_blocks/default.conf:ro

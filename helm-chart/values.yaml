@@ -1,0 +1,38 @@
+global:
+  fpm:
+    image:
+      repository: vuongxuongminh/docker-helm-laravel
+      tag: prod
+      pullPolicy: IfNotPresent
+    env: 'prod'
+    debug: 'false'
+    url: 'http://example'
+    key: '!ChangeMe!'
+
+nginx:
+  replicaCount: 1
+  existingServerBlockConfigmap: nginx-server-block
+  sidecars:
+    - name: fpm
+      image: '{{ .Values.global.fpm.image.repository }}:{{ .Values.global.fpm.image.tag }}'
+      imagePullPolicy: '{{ .Values.global.fpm.image.pullPolicy }}'
+      livenessProbe:
+        exec:
+          command:
+            - docker-healthcheck
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      readinessProbe:
+        exec:
+          command:
+            - docker-healthcheck
+        initialDelaySeconds: 10
+        timeoutSeconds: 5
+      envFrom:
+        - configMapRef:
+            name: '{{ template "fpm" . }}'
+        - secretRef:
+            name: '{{ template "fpm" . }}'
+      ports:
+        - name: fpm
+          containerPort: 9000
