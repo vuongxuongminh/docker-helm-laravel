@@ -19,7 +19,7 @@ jobs:
       - name: Test with curl
         run: curl http://localhost | grep "Laravel"
 
-  build-dev:
+  build-local:
     if: ${{ github.ref == 'refs/heads/main' }}
     needs: [test]
     runs-on: ubuntu-latest
