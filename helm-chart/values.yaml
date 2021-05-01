@@ -12,6 +12,12 @@ global:
 nginx:
   replicaCount: 1
   existingServerBlockConfigmap: nginx-server-block
+  extraVolumes: 
+    - name: public-dir
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: public-dir
+      mountPath: /laravel/public
   sidecars:
     - name: fpm
       image: '{{ .Values.global.fpm.image.repository }}:{{ .Values.global.fpm.image.tag }}'
