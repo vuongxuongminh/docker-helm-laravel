@@ -5,26 +5,11 @@ x-build:
     APP_ENV: 'production'
     APP_DEBUG: 'false'
   - &build-cache
-    - ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:production
-    - ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:production
+    - ${IMAGE:-vuongxuongminh/docker-helm-laravel}:production
 
 services:
   fpm:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:production
-    build:
-      cache_from: *build-cache
-      args:
-        << : *build-args
-
-  supervisor:
-    image: ${PHP_IMAGE:-vuongxuongminh/docker-helm-laravel-php}:production
-    build:
-      cache_from: *build-cache
-      args:
-        << : *build-args
-
-  nginx:
-    image: ${NGINX_IMAGE:-vuongxuongminh/docker-helm-laravel-nginx}:production
+    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:production
     build:
       cache_from: *build-cache
       args:

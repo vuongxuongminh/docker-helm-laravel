@@ -1,7 +1,0 @@
-Now you can access:
-
-Your Laravel app: {{ .Values.ingress.nginx.hostName }}
-Supervisor management: {{ .Values.ingress.supervisor.hostName }}
-{{- if .Values.rabbitmq.ingress.enabled }}
-RabbitMQ management: {{ .Values.rabbitmq.ingress.hostName }}
-{{- end }}

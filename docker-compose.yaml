@@ -5,38 +5,24 @@ services:
     command: ['fpm']
     build:
       context: .
-      dockerfile: ./docker/Dockerfile
-      target: php
+      dockerfile: ./docker/fpm/Dockerfile
     healthcheck:
       test: ['CMD', 'docker-healthcheck', 'fpm']
       interval: 10s
       timeout: 3s
       retries: 3
-      start_period: 30s
-
-  supervisor:
-    command: ['supervisor']
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-      target: php
-    healthcheck:
-      test: ['CMD', 'docker-healthcheck', 'supervisor']
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 30s
+      start_period: 10s
+    network_mode: service:nginx
 
   nginx:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-      target: nginx
+    image: bitnami/nginx
     healthcheck:
-      test: ['CMD', 'docker-healthcheck']
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/status']
       interval: 10s
       timeout: 3s
       retries: 3
-      start_period: 30s
-    depends_on:
-      - fpm
+      start_period: 10s
+    ports:
+    - target: 8080
+      published: 80
+      protocol: tcp

@@ -1,0 +1,46 @@
+name: CI
+
+on: push
+
+env:
+  IMAGE: vuongxuongminh/docker-helm-laravel
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run setup
+        run: docker-compose run --rm setup
+      - name: Up services
+        run: docker-compose up -d
+      - name: Wait seconds
+        run: sleep 5
+      - name: Test with curl
+        run: curl http://localhost | grep "Laravel"
+
+  build-local:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
+      - name: Build image
+        run: docker-compose -f docker-compose.yaml -f docker-compose.override.yaml build fpm
+      - name: Push image
+        run: docker-compose -f docker-compose.yaml -f docker-compose.override.yaml push fpm
+
+  build-prod:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin
+      - name: Build image
+        run: docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml build fpm
+      - name: Push image
+        run: docker-compose -f docker-compose.yaml -f docker-compose.prod.yaml push fpm
