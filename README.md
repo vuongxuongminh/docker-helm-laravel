@@ -85,9 +85,9 @@ The following table lists the configurable parameters of this chart and their de
 | Parameter                                    | Description                                                                                                                            | Default                                                                                   |
 |----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | global.fpm.image.repository                  | Image repo.                                                                                                                            | `vuongxuongminh/docker-helm-laravel`                                                      |
-| global.fpm.image.tag                         | Image tag.                                                                                                                             | `prod`                                                                                    |
+| global.fpm.image.tag                         | Image tag.                                                                                                                             | `production`                                                                              |
 | global.fpm.image.pullPolicy                  | Image pull policy.                                                                                                                     | `IfNotPresent`                                                                            |
-| global.fpm.env                               | Use to set `APP_ENV` env in FPM container.                                                                                             | `prod`                                                                                    |
+| global.fpm.env                               | Use to set `APP_ENV` env in FPM container.                                                                                             | `production`                                                                                    |
 | global.fpm.debug                             | Use to set `APP_DEBUG` env in FPM container.                                                                                           | `false`                                                                                   |
 | global.fpm.key                               | Use to set `APP_KEY` env in FPM container.                                                                                             | `!ChangeMe!`                                                                              |
 | global.fpm.url                               | Use to set `APP_URL` env in FPM container.                                                                                             | `http://example`                                                                          |
@@ -95,10 +95,10 @@ The following table lists the configurable parameters of this chart and their de
 Specify each parameter using the --set key=value[,key=value] argument to helm install. For example,
 
 ```shell script
-$ helm install app ./helm-chart --set global.fpm.env="prod" --set global.fpm.debug="false"
+$ helm install app ./helm-chart --set global.fpm.env="production" --set global.fpm.debug="false"
 ```
 
-The above command sets the environment variables APP_ENV to `prod`, APP_DEBUG to `false`.
+The above command sets the environment variables APP_ENV to `production`, APP_DEBUG to `false`.
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 

@@ -2,9 +2,9 @@ global:
   fpm:
     image:
       repository: vuongxuongminh/docker-helm-laravel
-      tag: prod
+      tag: production
       pullPolicy: IfNotPresent
-    env: 'prod'
+    env: 'production'
     debug: 'false'
     url: 'http://example'
     key: '!ChangeMe!'

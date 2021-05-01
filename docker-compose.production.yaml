@@ -2,14 +2,14 @@ version: '3.4'
 
 x-build:
   - &build-args
-    APP_ENV: 'prod'
+    APP_ENV: 'production'
     APP_DEBUG: 'false'
   - &build-cache
-    - ${IMAGE:-vuongxuongminh/docker-helm-laravel}:prod
+    - ${IMAGE:-vuongxuongminh/docker-helm-laravel}:production
 
 services:
   fpm:
-    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:prod
+    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:production
     build:
       cache_from: *build-cache
       args:
