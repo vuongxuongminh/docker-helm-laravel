@@ -11,7 +11,3 @@ opcache.memory_consumption = 256
 opcache.validate_timestamps = 0
 realpath_cache_size = 4096K
 realpath_cache_ttl = 600
-
-# https://symfony.com/blog/new-in-symfony-4-4-preloading-symfony-applications-in-php-7-4
-opcache.preload=/symfony/config/preload.php
-opcache.preload_user=www-data
