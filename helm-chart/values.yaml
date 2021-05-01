@@ -7,12 +7,12 @@ global:
     env: 'production'
     debug: 'false'
     url: 'http://example'
-    key: '!ChangeMe!'
+#    key: 'base64:!ChangeMe!'
 
 nginx:
   replicaCount: 1
   existingServerBlockConfigmap: nginx-server-block
-  extraVolumes: 
+  extraVolumes:
     - name: public-dir
       emptyDir: {}
   extraVolumeMounts:
