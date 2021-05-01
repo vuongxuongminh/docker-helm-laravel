@@ -32,7 +32,7 @@ This starts the following services:
 |---------------|---------------------------------------------------------------------|------ |--------------|
 | fpm           | FastCGI process manager with PHP-FPM, Composer.                     | n/a   | all          |
 | nginx         | Reverse proxy handle request with NGINX.                            | 80    | all          |
-| setup         | Setup service help install Composer package.                        | n/a   | dev          |
+| setup         | Setup service help install Composer package.                        | n/a   | development  |
 
 This results in the following running containers:
 
