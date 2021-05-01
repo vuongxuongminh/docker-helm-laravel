@@ -5,11 +5,11 @@ x-build:
     APP_ENV: 'local'
     APP_DEBUG: 'true'
   - &build-cache
-    - ${IMAGE:-vuongxuongminh/docker-helm-laravel}:dev
+    - ${IMAGE:-vuongxuongminh/docker-helm-laravel}:local
 
 services:
   setup:
-    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:dev
+    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:local
     command: ['setup']
     build:
       context: .
@@ -21,7 +21,7 @@ services:
       - ./laravel:/laravel
 
   fpm:
-    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:dev
+    image: ${IMAGE:-vuongxuongminh/docker-helm-laravel}:local
     build:
       cache_from: *build-cache
       args:
